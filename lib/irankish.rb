@@ -16,7 +16,7 @@ module Irankish
   end
 
   class Configuration
-    attr_accessor :merchantId, :revertURL,:getTokenWDSL,:getVerifyWDSL,:sha1Key
+    attr_accessor :merchantId, :revertURL,:getTokenWSDL,:verifyWSDL,:sha1Key
    
     def initialize
   

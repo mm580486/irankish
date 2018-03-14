@@ -3,7 +3,7 @@ require "savon"
 module Irankish
     class GetToken
       include Validatable
-      attr_accessor :amount,:getTokenWDSL,:sha1Key,:merchantId,:invoiceNumber,:revertURL,:paymentId,:description,:specialPaymentId,:extraParam1,:extraParam2,:extraParam3,:extraParam4
+      attr_accessor :amount,:getTokenWSDL,:sha1Key,:merchantId,:invoiceNumber,:revertURL,:paymentId,:description,:specialPaymentId,:extraParam1,:extraParam2,:extraParam3,:extraParam4
       attr_reader   :response
       validates_presence_of :amount
       validates_presence_of :merchantId
@@ -11,7 +11,20 @@ module Irankish
       validates_presence_of :revertURL
 
       def initialize(args = {})
-        @getTokenWDSL        = Savon.client(wsdl: args.fetch(:getTokenWDSL, Irankish.configuration.getTokenWDSL), pretty_print_xml: true)
+        @getTokenWSDL        = Savon.client(wsdl: args.fetch(:getTokenWSDL, Irankish.configuration.getTokenWSDL),namespaces: {
+          "xmlns:tem"     => "http://tempuri.org/",
+          "xmlns:soapenv" => "http://schemas.xmlsoap.org/soap/envelope/"
+      },
+      namespace_identifier: :tem,
+      env_namespace: :soapenv,
+      log: true, # set true to switch on logging
+      log_level: :debug,
+      element_form_default: :qualified,
+      pretty_print_xml: true,
+      open_timeout: 3000000,
+      read_timeout: 3000000,
+      encoding: "UTF-8"
+  )
         @sha1Key             = args.fetch(:sha1Key, Irankish.configuration.sha1Key)
         @merchantId          = args.fetch(:merchantId, Irankish.configuration.merchantId)
         @revertURL           = args.fetch(:revertURL, Irankish.configuration.revertURL)
@@ -29,12 +42,13 @@ module Irankish
 
       
       def call
-        response = @getTokenWDSL.call :make_token, message: {
-            'merchantId'       => @merchantId,
-            'revertURL'        => @revertURL,
-            'amount'           => @amount,
-            'invoiceNumber'    => @invoiceNumber,
-            'invoiceNo'        => @invoiceNumber
+        response = @getTokenWSDL.call :make_token, message: {
+          'amount'           => @amount,   
+          'merchantId'       => @merchantId,
+          'invoiceNo'        => @invoiceNumber,
+          'revertURL'        => @revertURL
+            
+
             # 'paymentId'        => @paymentId,
             # 'description'      => @description,
             # 'specialPaymentId' => @specialPaymentId,
@@ -49,3 +63,7 @@ module Irankish
   end 
 
 end
+
+
+
+
