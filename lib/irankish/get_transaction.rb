@@ -1,19 +1,18 @@
 require "savon"
 
 module Irankish
-    class Verify
+    class GetTransaction
       include Validatable
-      attr_accessor :merchantId,:referenceNumber,:sha1Key,:token
+      attr_accessor :amount,:merchantId,:referenceNumber,:sha1Key
       attr_reader   :response
 
-      validates_presence_of :token
+      validates_presence_of :amount
       validates_presence_of :merchantId
       validates_presence_of :referenceNumber
       validates_presence_of :sha1Key
 
-
       def initialize(args = {})
-        @getTokenWSDL        = Savon.client(wsdl: args.fetch(:verfiyWSDL, Irankish.configuration.verifyWSDL),namespaces: {
+        @getTokenWSDL        = Savon.client(wsdl: args.fetch(:verfiyWSDL,Irankish.configuration.getTokenWSDL),namespaces: {
           "xmlns:tem"     => "http://tempuri.org/",
           "xmlns:soapenv" => "http://schemas.xmlsoap.org/soap/envelope/"
       },
@@ -31,19 +30,15 @@ module Irankish
         @merchantId          = args.fetch(:merchantId, Irankish.configuration.merchantId)
         @amount              = args.fetch(:amount)
         @referenceNumber     = args.fetch(:referenceNumber)
-        @token               = args.fetch(:amount)
         @response            = ValidateVerify.new()
       end
 
       
       def call
-
-        
-        response = @getTokenWSDL.call :kiccc_payments_verification, message: {
-          'token'            => @token,
+        response = @getTokenWSDL.call :get_limited_transacction, message: {
           'merchantId'       => @merchantId,
-          'referenceNumber'  => @referenceNumber,
-          'sha1Key'          => @sha1Key
+          'invoiceNo'        => @referenceNumber,
+          'amount'           => @amount
         }
         @response.validate(response.body)
       end

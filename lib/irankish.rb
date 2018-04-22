@@ -28,6 +28,6 @@ module Irankish
 end
 
 
-%w(version verify validate_verify validate_token_response get_token).each do |identify|
-  require "irankish/#{identify}"
+%w(version get_transaction validate_verify verify validate_token_response get_token).each do |identify|
+  require_relative "irankish/#{identify}.rb"
 end
